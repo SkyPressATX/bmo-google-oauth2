@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.3.3
+Version: 0.3.4
 Author: BMO ^_^
 */
 
@@ -12,10 +12,10 @@ require_once 'vendor/google-api-php-client/vendor/autoload.php'; //Require Googl
 /***** The Master Class to Rule them All *****/
 class bmo_google_oath {
 
-	private $menu_slug = 'bmo-oauth';
-	private $option_slug = 'bmo_oauth';
-	private $section_slug = 'bmo_oauth_options';
-	private $bmo_options;
+	public $menu_slug = 'bmo-oauth';
+	public $option_slug = 'bmo_oauth';
+	public $section_slug = 'bmo_oauth_options';
+	public $bmo_options;
 
 	public function __construct(){
 		$this->bmo_options = (object)get_option( $this->option_slug, [] );

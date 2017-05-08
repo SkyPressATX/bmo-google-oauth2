@@ -26,7 +26,7 @@ class bmo_admin_options extends bmo_google_oath {
 		register_setting(
 			$this->option_slug, //$option_group
 			$this->option_slug, //$option_name
-			[ $this, 'bmo_sanitize' ]//$sanistize_callback
+			[ $this, 'bmo_sanitize' ] //$sanistize_callback
 		);
 
 		add_settings_section(
@@ -94,6 +94,7 @@ class bmo_admin_options extends bmo_google_oath {
 	}
 
 	public function render_admin_page(){
+
 		$this->secret_key = $this->bmo_oauth_secret_key();
 
 		echo '<div class="wrap"><H1>BMO Google OAuth2 Options</H1><form method="post" action="options.php">';
