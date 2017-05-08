@@ -74,13 +74,13 @@ class bmo_admin_options extends bmo_google_oath {
 	}
 
 	public function bmo_oauth_client_id_cb(){
-		echo '<input type="text" id="client_id" name="bmo_oauth[bmo_oauth_client_id]" value="' . $this->bmo_options->bmo_oauth_client_id . '">';
+		echo '<input type="text" id="bmo_oauth_client_id" size="100" name="bmo_oauth[bmo_oauth_client_id]" value="' . $this->bmo_options->bmo_oauth_client_id . '">';
 	}
 
 	public function bmo_oauth_secret_key_cb(){
 		printf(
-			'<input type="password" id="bmo_oauth_secret_key" size="50" name="bmo_oauth[bmo_oauth_secret_key_cb]" value="%s" />',
-			isset( $this->secret_key ) ? esc_attr( $this->secret_key ) : esc_attr( 'NONE' )
+			'<input type="text" id="bmo_oauth_secret_key" size="100" name="bmo_oauth[bmo_oauth_secret_key_cb]" value="%s" />',
+			isset( $this->secret_key ) ? esc_attr( $this->key_decrypt( $this->secret_key ) ) : esc_attr( 'NONE' )
 		);
 	}
 
