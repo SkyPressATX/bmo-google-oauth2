@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.3.1
+Version: 0.3.2
 Author: BMO ^_^
 */
 
@@ -36,7 +36,7 @@ class bmo_google_oath {
 	public function bmo_oauth_secret_key( $oauth_secret_key = false ){
         if( $oauth_secret_key ) return $oauth_secret_key; // Helps with Testing
         $bmo_opts = get_option( 'bmo_oauth', [] );
-        if( isset( $oauth_secret_key[ 'bmo_oauth_secret_key_cb' ] ) ) return $this->key_decrypt( $oauth_secret_key[ 'bmo_oauth_secret_key_cb' ] );
+        if( isset( $bmo_opts[ 'bmo_oauth_secret_key' ] ) ) return $this->key_decrypt( $bmo_opts[ 'bmo_oauth_secret_key' ] );
     }
 
 }

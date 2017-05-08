@@ -105,7 +105,6 @@ class bmo_admin_options extends bmo_google_oath {
 
 	public function render_admin_page(){
 		$this->secret_key = $this->bmo_oauth_secret_key();
-		print_r( $this->secret_key );
 
 		echo '<div class="wrap"><H1>BMO Google OAuth2 Options</H1><form method="post" action="options.php">';
 		settings_fields( 'bmo_oauth' );
