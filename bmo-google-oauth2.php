@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.4.1
+Version: 0.4.2
 Author: BMO ^_^
 */
 
@@ -13,7 +13,6 @@ class bmo_google_oath {
 	public $menu_slug = 'bmo-oauth';
 	public $option_slug = 'bmo_oauth';
 	public $section_slug = 'bmo_oauth_options';
-	public $is_rest = false;
 	public $bmo_options;
 
 	public function __construct(){
@@ -45,25 +44,16 @@ class bmo_google_oath {
     }
 
 	public function bmo_redirect_to_google(){
-		var_dump( $this );
+		if( ! is_user_logged_in() ){
+			wp_redirect( 'https://google.com' );
+			exit();
 	}
-	/**
-     * Is Rest Request
-     * Check REQUEST_URI against $api_prefix (c opied from WAR Framework )
-     *
-     * @param $api_prefix Sting
-     * @return Bool
-     */
-    private function is_rest_request(){
-		$api_prefix = apply_filters( 'rest_url_prefix', '' );
-        $url = explode('/',$_SERVER["REQUEST_URI"]);
-        array_shift($url);
-        return ( $api_prefix === $url[0] || $url[0] === 'wp-json' );
-    }
 
 }
 
+/** Run this check on the WP Hook. Rest API requests dont use the 'wp' hook **/
 add_action( 'wp', [ new bmo_google_oath, 'bmo_redirect_to_google' ] );
+
 /** Updater Class only needs to be available in wp-admin **/
 if( is_admin() ){
 	require_once 'src/bmo-update.php';
