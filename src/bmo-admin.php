@@ -7,11 +7,6 @@ if( ! defined( 'WPINC' ) ){
 
 class bmo_admin_options extends bmo_google_oath {
 
-	public function __construct(){
-		add_action( 'admin_menu', [ $this, 'add_admin_page' ] );
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
-	}
-
 	public function add_admin_page(){
 		add_options_page(
 			'BMO Google OAuth', //$page_title
@@ -108,4 +103,8 @@ class bmo_admin_options extends bmo_google_oath {
 
 }
 
-if( is_admin() ) $bmo_admin_options = new bmo_admin_options;
+if( is_admin() ){
+	$bmo_admin_options = new bmo_admin_options;
+	add_action( 'admin_menu', [ $bmo_admin_options, 'add_admin_page' ] );
+	add_action( 'admin_init', [ $bmo_admin_options, 'register_settings' ] );
+}
