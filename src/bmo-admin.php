@@ -48,6 +48,13 @@ class bmo_admin_options extends bmo_google_oath {
 			$this->section_slug // $section
 		);
 		add_settings_field(
+			'project_id', //$id
+			'Oauth Project ID', // $title
+			[ $this, 'bmo_oauth_project_id_cb' ], //$callback
+			$this->menu_slug, //$page
+			$this->section_slug // $section
+		);
+		add_settings_field(
 			'client_secret', //$id
 			'OAuth Secret Key', // $title
 			[ $this, 'bmo_oauth_secret_key_cb' ], //$callback
@@ -75,6 +82,9 @@ class bmo_admin_options extends bmo_google_oath {
 		);
 	}
 
+	public function bmo_oauth_project_id_cb(){
+		echo '<input type="text" id="project_id" size="100" name="bmo_oauth[project_id]" value="' . $this->bmo_options->project_id . '">';
+	}
 	public function bmo_oauth_client_id_cb(){
 		echo '<input type="text" id="client_id" size="100" name="bmo_oauth[client_id]" value="' . $this->bmo_options->client_id . '">';
 	}
