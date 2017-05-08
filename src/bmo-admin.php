@@ -77,11 +77,26 @@ class bmo_admin_options extends bmo_google_oath {
 		return $a;
 	}
 
+	public function bmo_oauth_active_cb(){
+		printf(
+			'<input type="checkbox" id="autologin_active" name="bmo_oauth[bmo_oauth_active]" value="1" %s>',
+			( get_option( 'bmo_oauth_active' ) == '1' ? 'checked="checked"' : '' )
+		);
+	}
+
+	public function bmo_oauth_client_id_cb(){
+		echo '<input type="text" id="client_id" name="bmo_oauth[bmo_oauth_client_id]" value="' . get_option( 'bmo_oauth_client_id' ) . '">';
+	}
+
 	public function bmo_oauth_secret_key_cb(){
 		printf(
 			'<input type="password" id="bmo_oauth_secret_key" size="50" name="bmo_oauth[bmo_oauth_secret_key_cb]" value="%s" />',
 			isset( $this->secret_key ) ? esc_attr( $this->secret_key ) : esc_attr( 'NONE' )
 		);
+	}
+
+	public function bmo_oauth_allowed_domains_cb(){
+		echo '<input type="text" id="allowed_domains" name="bmo_oauth[bmo_oauth_allowd_domains]" value="' . get_option( 'bmo_oauth_allowd_domains' ) . '">';
 	}
 
 	public function render_admin_page(){
