@@ -17,3 +17,9 @@ class bmo_google_oath {
 	}
 
 }
+
+/** Updater Class only needs to be available in wp-admin **/
+if( is_admin() ){
+	require_once 'src/bmo-update.php';
+	new bmo_plugin_updater( __FILE__, 'SkyPressATX', 'bmo-google-oath2' );
+}
