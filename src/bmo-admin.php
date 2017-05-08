@@ -7,15 +7,6 @@ if( ! defined( 'WPINC' ) ){
 
 class bmo_admin_options extends bmo_google_oath {
 
-	private $active;
-	private $client_id;
-	private $secret_key;
-	private $allowed_domains;
-	private $menu_slug = 'bmo-oauth';
-	private $option_slug = 'bmo_oauth';
-	private $section_slug = 'bmo_oauth_options';
-
-
 	public function __construct(){
 		add_action( 'admin_menu', [ $this, 'add_admin_page' ] );
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
@@ -76,7 +67,6 @@ class bmo_admin_options extends bmo_google_oath {
 	}
 
 	public function bmo_sanitize( $a ){
-		print_r( $a );
 		if( is_array( $a ) && isset( $a[ 'bmo_oauth_secret_key_cb' ] ) ) $a[ 'bmo_oauth_secret_key_cb' ] = $this->key_encrypt( $a[ 'bmo_oauth_secret_key_cb' ] );
 		return $a;
 	}
@@ -84,12 +74,12 @@ class bmo_admin_options extends bmo_google_oath {
 	public function bmo_oauth_active_cb(){
 		printf(
 			'<input type="checkbox" id="autologin_active" name="bmo_oauth[bmo_oauth_active]" value="1" %s>',
-			( get_option( 'bmo_oauth_active' ) == '1' ? 'checked="checked"' : '' )
+			( $this->bmo_options->bmo_oauth_active == '1' ? 'checked="checked"' : '' )
 		);
 	}
 
 	public function bmo_oauth_client_id_cb(){
-		echo '<input type="text" id="client_id" name="bmo_oauth[bmo_oauth_client_id]" value="' . get_option( 'bmo_oauth_client_id' ) . '">';
+		echo '<input type="text" id="client_id" name="bmo_oauth[bmo_oauth_client_id]" value="' . $this->bmo_options->bmo_oauth_client_id . '">';
 	}
 
 	public function bmo_oauth_secret_key_cb(){
@@ -100,15 +90,15 @@ class bmo_admin_options extends bmo_google_oath {
 	}
 
 	public function bmo_oauth_allowed_domains_cb(){
-		echo '<input type="text" id="allowed_domains" name="bmo_oauth[bmo_oauth_allowd_domains]" value="' . get_option( 'bmo_oauth_allowd_domains' ) . '">';
+		echo '<input type="text" id="bmo_oauth_allowd_domains" name="bmo_oauth[bmo_oauth_allowd_domains]" value="' . $this->bmo_options->bmo_oauth_allowd_domains . '">';
 	}
 
 	public function render_admin_page(){
 		$this->secret_key = $this->bmo_oauth_secret_key();
 
 		echo '<div class="wrap"><H1>BMO Google OAuth2 Options</H1><form method="post" action="options.php">';
-		settings_fields( 'bmo_oauth' );
-		do_settings_sections( 'bmo-oauth' );
+		settings_fields( $this->option_slug );
+		do_settings_sections( $this->menu_slug );
 		submit_button();
 		echo '</form></div>';
 

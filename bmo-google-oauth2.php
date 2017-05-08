@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.3.2
+Version: 0.3.3
 Author: BMO ^_^
 */
 
@@ -12,7 +12,14 @@ require_once 'vendor/google-api-php-client/vendor/autoload.php'; //Require Googl
 /***** The Master Class to Rule them All *****/
 class bmo_google_oath {
 
-	private $oauth_secret_key;
+	private $menu_slug = 'bmo-oauth';
+	private $option_slug = 'bmo_oauth';
+	private $section_slug = 'bmo_oauth_options';
+	private $bmo_options;
+
+	public function __construct(){
+		$this->bmo_options = (object)get_option( $this->option_slug, [] );
+	}
 
 	public function key_encrypt( $string ){
         $iv_size = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CFB );
@@ -33,10 +40,8 @@ class bmo_google_oath {
         return ( $dc ) ? $dc : $val;
     }
 
-	public function bmo_oauth_secret_key( $oauth_secret_key = false ){
-        if( $oauth_secret_key ) return $oauth_secret_key; // Helps with Testing
-        $bmo_opts = get_option( 'bmo_oauth', [] );
-        if( isset( $bmo_opts[ 'bmo_oauth_secret_key' ] ) ) return $this->key_decrypt( $bmo_opts[ 'bmo_oauth_secret_key' ] );
+	public function bmo_oauth_secret_key(){
+        if( isset( $this->bmo_options->bmo_oauth_secret_key ) ) return $this->key_decrypt( $this->bmo_options->bmo_oauth_secret_key );
     }
 
 }
