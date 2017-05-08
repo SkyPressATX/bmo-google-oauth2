@@ -16,6 +16,8 @@
 			$this->configure_auth_config();
 			$auth_config = $this->set_auth_config();
 			if( is_wp_error( $auth_config ) ) return $auth_config;
+			$scope = $this->add_scope();
+			if( is_wp_error( $scope ) ) return $scope;
 			$this->get_auth_url();
 			if( is_wp_error( $this->auth_url ) ) return $this->auth_url;
 			wp_redirect( filter_var( $this->auth_url, FILTER_SANITIZE_URL ) );
@@ -27,10 +29,12 @@
 		}
 
 		private function configure_auth_config(){
+			unset( $this->bmo_options->bmo_oauth_allowd_domains );
 			$this->bmo_options->client_secret = $this->bmo_oauth_secret_key();
 			$this->bmo_options->auth_uri = "https://accounts.google.com/o/oauth2/auth";
 			$this->bmo_options->token_uri = "https://accounts.google.com/o/oauth2/token";
 			$this->bmo_options->auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs";
+			$this->bmo_options->redirect_uri = [ site_url() ];
 			$this->google_secrets = [
 				'web' => (array)$this->bmo_options
 			];
@@ -47,6 +51,12 @@
 		private function get_auth_url(){
 			try {
 				$this->auth_url = $this->google->createAuthUrl();
+			} catch( Exception $e ){ return $this->error_catch( $e ); }
+		}
+
+		private function add_scope(){
+			try {
+				$this->google->addScope( 'https://www.googleapis.com/auth/userinfo.email' );
 			} catch( Exception $e ){ return $this->error_catch( $e ); }
 		}
 
