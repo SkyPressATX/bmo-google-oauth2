@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.4
+Version: 0.4.1
 Author: BMO ^_^
 */
 
@@ -13,10 +13,12 @@ class bmo_google_oath {
 	public $menu_slug = 'bmo-oauth';
 	public $option_slug = 'bmo_oauth';
 	public $section_slug = 'bmo_oauth_options';
+	public $is_rest = false;
 	public $bmo_options;
 
 	public function __construct(){
 		$this->bmo_options = (object)get_option( $this->option_slug, [] );
+		$this->is_rest = $this->is_rest_request();
 	}
 
 	public function key_encrypt( $string ){
@@ -42,6 +44,9 @@ class bmo_google_oath {
         if( isset( $this->bmo_options->bmo_oauth_secret_key ) ) return $this->key_decrypt( $this->bmo_options->bmo_oauth_secret_key );
     }
 
+	public function bmo_redirect_to_google(){
+		var_dump( $this );
+	}
 	/**
      * Is Rest Request
      * Check REQUEST_URI against $api_prefix (c opied from WAR Framework )
@@ -49,26 +54,16 @@ class bmo_google_oath {
      * @param $api_prefix Sting
      * @return Bool
      */
-    public function is_rest_request(){
+    private function is_rest_request(){
 		$api_prefix = apply_filters( 'rest_url_prefix', '' );
         $url = explode('/',$_SERVER["REQUEST_URI"]);
         array_shift($url);
-        $is_rest = ( $api_prefix === $url[0] || $url[0] === 'wp-json' );
-        define( 'IS_REST', $is_rest );
-        return $is_rest;
+        return ( $api_prefix === $url[0] || $url[0] === 'wp-json' );
     }
 
 }
 
-$bmo_google_oath = new bmo_google_oath;
-/**
- * Check if this is not an API call, then load bmo-auth.php
- **/
- $bmo_google_oath->is_rest_request();
- if( ! defined( 'IS_REST' ) && ! is_user_logged_in() ){
-	var_dump( 'not a rest request' );
- }
-
+add_action( 'wp', [ new bmo_google_oath, 'bmo_redirect_to_google' ] );
 /** Updater Class only needs to be available in wp-admin **/
 if( is_admin() ){
 	require_once 'src/bmo-update.php';
