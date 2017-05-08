@@ -64,7 +64,7 @@ class bmo_admin_options extends bmo_google_oath {
 	}
 
 	public function bmo_sanitize( $a ){
-		if( is_array( $a ) && isset( $a[ 'bmo_oauth_secret_key_cb' ] ) ) $a[ 'bmo_oauth_secret_key_cb' ] = $this->key_encrypt( $a[ 'bmo_oauth_secret_key_cb' ] );
+		if( is_array( $a ) && isset( $a[ 'bmo_oauth_secret_key' ] ) ) $a[ 'bmo_oauth_secret_key' ] = $this->key_encrypt( $a[ 'bmo_oauth_secret_key' ] );
 		return $a;
 	}
 
