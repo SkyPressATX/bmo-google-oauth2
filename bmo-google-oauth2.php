@@ -46,5 +46,5 @@ if( is_admin() ){
 	require_once 'src/bmo-update.php';
 	require_once 'src/bmo-admin.php';
 
-	new bmo_plugin_updater( __FILE__, 'SkyPressATX', 'bmo-google-oath2' );
+	new bmo_plugin_updater( __FILE__, 'SkyPressATX', 'bmo-google-oauth2' );
 }
