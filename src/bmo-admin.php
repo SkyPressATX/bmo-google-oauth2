@@ -41,14 +41,14 @@ class bmo_admin_options extends bmo_google_oath {
 			$this->section_slug // $section
 		);
 		add_settings_field(
-			'bmo_oauth_client_id', //$id
+			'client_id', //$id
 			'Oauth Client ID', // $title
 			[ $this, 'bmo_oauth_client_id_cb' ], //$callback
 			$this->menu_slug, //$page
 			$this->section_slug // $section
 		);
 		add_settings_field(
-			'bmo_oauth_secret_key', //$id
+			'client_secret', //$id
 			'OAuth Secret Key', // $title
 			[ $this, 'bmo_oauth_secret_key_cb' ], //$callback
 			$this->menu_slug, //$page
@@ -76,12 +76,12 @@ class bmo_admin_options extends bmo_google_oath {
 	}
 
 	public function bmo_oauth_client_id_cb(){
-		echo '<input type="text" id="bmo_oauth_client_id" size="100" name="bmo_oauth[bmo_oauth_client_id]" value="' . $this->bmo_options->bmo_oauth_client_id . '">';
+		echo '<input type="text" id="client_id" size="100" name="bmo_oauth[client_id]" value="' . $this->bmo_options->client_id . '">';
 	}
 
 	public function bmo_oauth_secret_key_cb(){
 		printf(
-			'<input type="text" id="bmo_oauth_secret_key" size="100" name="bmo_oauth[bmo_oauth_secret_key]" value="%s" />',
+			'<input type="text" id="client_secret" size="100" name="bmo_oauth[client_secret]" value="%s" />',
 			isset( $this->secret_key ) ? esc_attr( $this->secret_key ) : esc_attr( 'NONE' )
 		);
 	}
