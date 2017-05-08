@@ -17,7 +17,6 @@ class bmo_google_oath {
 
 	public function __construct(){
 		$this->bmo_options = (object)get_option( $this->option_slug, [] );
-		$this->is_rest = $this->is_rest_request();
 	}
 
 	public function key_encrypt( $string ){
@@ -47,6 +46,7 @@ class bmo_google_oath {
 		if( ! is_user_logged_in() ){
 			wp_redirect( 'https://google.com' );
 			exit();
+		}
 	}
 
 }
