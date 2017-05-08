@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.4.6
+Version: 0.4.7
 Author: BMO ^_^
 */
 
@@ -45,7 +45,7 @@ class bmo_google_oath {
 	public function bmo_auth_init(){
 		if( ! is_user_logged_in() ){
 			$bmo_auth = new bmo_auth;
-			$bmo_auth->init();
+			$bmo_auth->login_init();
 		}
 	}
 
