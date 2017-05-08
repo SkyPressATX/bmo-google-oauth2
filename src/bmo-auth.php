@@ -27,7 +27,7 @@
 		}
 
 		private function configure_auth_config(){
-			if( isset( $this->bmo_options->client_secret ) ) $this->bmo_options->client_secret = $this->key_decode( $this->bmo_options->client_secret );
+			$this->bmo_options->client_secret = $this->bmo_oauth_secret_key();
 			$this->bmo_options->auth_uri = "https://accounts.google.com/o/oauth2/auth";
 			$this->bmo_options->token_uri = "https://accounts.google.com/o/oauth2/token";
 			$this->bmo_options->auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs";
