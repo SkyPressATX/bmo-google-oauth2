@@ -33,9 +33,10 @@ class bmo_api extends bmo_auth {
 
 	public function validate_code( $param, $request, $key ){
 		try {
+			$auth = new bmo_auth;
+			$auth->init();
 			$this->google->authenticate( $code );
 			$access_token = $this->google->getAccessToken();
-			var_dump( $access_token );
 			return $access_token;
 		} catch( Exception $e ){ return $this->error_catch( $e ); }
 	}

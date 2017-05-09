@@ -4,24 +4,32 @@
 
 	class bmo_auth extends bmo_google_oath {
 
-		private $google;
+		public $google;
 		private $google_secrets;
 		private $secret_key;
-		private $redirect_url;
-		private $auth_ur;
+		public $redirect_url;
+		private $auth_url;
 		private $token_uri;
 		private $code;
+		public $rest_prefix;
 
 		public function init(){
 
-			$this->redirect_url = site_url() . '/' . rest_get_url_prefix();
+			$this->rest_prefix = rest_get_url_prefix();
+
+			$this->redirect_url = site_url() . '/' . $this->rest_prefix;
 			$this->redirect_url .= '/' . $this->option_slug . '/v1/' . $this->menu_slug;
 
 			//Config Google Client first and always
 			$this->config_google_client();
 
-			// Handle Actions Next
-			if( ! is_user_logged_in() ) $this->login_init();
+			$requested_url = explode( '/', $_SERVER[ 'REQUEST_URI' ] );
+			array_shift( $request_url );
+
+
+			if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ){
+				$this->login_init();
+			}
 		}
 
 		public function login_init(){
