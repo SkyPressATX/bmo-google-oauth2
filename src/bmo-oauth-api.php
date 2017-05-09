@@ -2,6 +2,11 @@
 
 class bmo_api extends bmo_auth {
 
+	private $auth;
+	private $google_user;
+	private $wp_user;
+	private $approved;
+
 	public function register_endpoint(){
 		register_rest_route(
 			$this->option_slug . '/v1', // Namespace
@@ -25,30 +30,54 @@ class bmo_api extends bmo_auth {
 
 	public function auth_success( \WP_REST_Request $request ){
 
-		$params = (object)$request;
-		if( isset( $params->error ) ) return WP_Error( 'oath-error', $params->error );
+		$params = (object)$request->get_params();
+		if( isset( $params->error ) ) return new WP_Error( 'oath-error', $params->error );
+		if( ! isset( $params->code ) ) return new WP_Error( 'oauth-error', 'No Auth Code' );
 
 		try {
-			$auth = new bmo_auth;
-			$auth->init();
-			$auth->google->authenticate( $params->code );
-			$access_token = $auth->google->getAccessToken();
+			$this->auth = new bmo_auth;
+			$this->auth->init();
 
-			$this->auto_login( 1 );
-			return $access_token;
+			$this->auth->google->authenticate( $params->code );
+
+			$this->google_user = $this->auth->service->userinfo->get();
+
+			$this->approved = $this->check_if_approved_email();
+			if( ! $this->approved ) return new WP_Error( 'oauth-error', $this->google_user->email . ' Is Not Approved' );
+
+			$this->get_wp_user_object();
+			if( is_wp_error( $this->wp_user ) ) return $this->wp_user;
+
+			$this->auto_login();
 		} catch( Exception $e ){ return $this->error_catch( $e ); }
 	}
 
 	public function handle_errors( $param, $request, $key ){
-		return WP_Error( 'oauth-error', $param );
+		return new WP_Error( 'oauth-error', $param );
 	}
 
-	private function auto_login( $user ){
-		wp_set_current_user( $user );
-		wp_set_auth_cookie( $user, true );
+	private function check_if_approved_email(){
+		$new_bmo = new bmo_google_oath;
+		$approved_emails = explode( ',', $new_bmo->bmo_options->approved_emails );
+		$email_check = explode( '@', $this->google_user->email );
+		if( sizeof( $email_check ) > 2 ) return false;
+		return ( in_array( $email_check[1], $approved_emails ) );
+	}
 
-		$user_obj = wp_get_current_user();
-		do_action( 'wp_login', $user_obj->user_login );
+	private function get_wp_user_object(){
+		$wp_user = get_user_by( $this->google_user->email, 'login' );
+		$this->wp_user = ( ! $wp_user ) ? $this->create_user : $wp_user;
+	}
+
+	private function create_user(){
+		$random_password = wp_generate_password( 12, false );
+		return wp_create_user( $this->google_user->email, $random_password, $this->google_user->email );
+	}
+
+	private function auto_login(){
+		wp_set_current_user( $this->wp_user->ID );
+		wp_set_auth_cookie( $this->wp_user->ID, true );
+		do_action( 'wp_login', $this->wp_user->user_login );
 	}
 
 }

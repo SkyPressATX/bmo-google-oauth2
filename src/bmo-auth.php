@@ -21,22 +21,19 @@
 			$this->config_google_client();
 
 			$requested_url = explode( '/', $_SERVER[ 'REQUEST_URI' ] );
-			array_shift( $request_url );
+			array_shift( $requested_url );
 
-			print_r( [ $requested_url[0], $this->rest_prefix ] );
-			// if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ) ){
+			if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ) ){
 				$this->login_init();
-			// }
+			}
 		}
 
 		public function login_init(){
 			$this->get_auth_url();
 			if( is_wp_error( $this->auth_url ) ) return $this->auth_url;
 
-			print_r( $this )
-
-			// wp_redirect( filter_var( $this->auth_url, FILTER_SANITIZE_URL ) );
-			// exit();
+			wp_redirect( filter_var( $this->auth_url, FILTER_SANITIZE_URL ) );
+			exit();
 		}
 
 		private function create_google_client(){
@@ -48,6 +45,8 @@
 			$this->configure_auth_config();
 			$auth_config = $this->set_auth_config();
 			if( is_wp_error( $auth_config ) ) return $auth_config;
+			$this->set_service();
+			if( is_wp_error( $this->service ) ) return $this->service;
 			$scope = $this->add_scope();
 			if( is_wp_error( $scope ) ) return $scope;
 		}
@@ -80,14 +79,19 @@
 			} catch( Exception $e ){ return $this->error_catch( $e ); }
 		}
 
-		private function add_scope(){
+		private function set_service(){
 			try {
-				$this->google->addScope( 'email' );
-				$this->google->addScope( 'profile' );
+				$this->service = new Google_Service_Oauth2( $this->google );
 			} catch( Exception $e ){ return $this->error_catch( $e ); }
 		}
 
-		private function error_catch( $e = false ){
+		private function add_scope(){
+			try {
+				$this->google->addScope( Google_Service_Oauth2::USERINFO_EMAIL );
+			} catch( Exception $e ){ return $this->error_catch( $e ); }
+		}
+
+		public function error_catch( $e = false ){
 			var_dump( $e );
 			return new WP_Error( $e->getMessage() );
 		}
