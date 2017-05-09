@@ -10,22 +10,48 @@
 		private $redirect_url;
 		private $auth_ur;
 		private $token_uri;
+		private $code;
+
+		public function init(){
+
+			//Config Google Client first and always
+			$this->config_google_client();
+
+			// Handle Actions Next
+			if( isset( $_GET[ 'code' ] ) ) $this->validate_google_code( $_GET[ 'code' ] );
+			if( ! is_user_logged_in() ) $this->login_init();
+		}
+
+		public function validate_google_code( $code ){
+			// THIS NEEDS TO BE A REST API ENDPOINT IN THE END
+			try {
+				$this->google->authenticate( $code );
+				$access_token = $this->google->getAccessToken();
+				var_dump( $access_token );
+				return $access_token;
+			} catch( Exception $e ){ return $this->error_catch( $e ); }
+
+		}
 
 		public function login_init(){
-			$this->create_google_client();
-			$this->configure_auth_config();
-			$auth_config = $this->set_auth_config();
-			if( is_wp_error( $auth_config ) ) return $auth_config;
-			$scope = $this->add_scope();
-			if( is_wp_error( $scope ) ) return $scope;
 			$this->get_auth_url();
 			if( is_wp_error( $this->auth_url ) ) return $this->auth_url;
+
 			wp_redirect( filter_var( $this->auth_url, FILTER_SANITIZE_URL ) );
 			exit();
 		}
 
 		private function create_google_client(){
 			$this->google = new Google_Client();
+		}
+
+		private function config_google_client(){
+			$this->create_google_client();
+			$this->configure_auth_config();
+			$auth_config = $this->set_auth_config();
+			if( is_wp_error( $auth_config ) ) return $auth_config;
+			$scope = $this->add_scope();
+			if( is_wp_error( $scope ) ) return $scope;
 		}
 
 		private function configure_auth_config(){

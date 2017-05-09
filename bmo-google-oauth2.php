@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.5.0
+Version: 0.5.1
 Author: BMO ^_^
 */
 
@@ -43,20 +43,13 @@ class bmo_google_oath {
 		return false;
     }
 
-	public function bmo_auth_init(){
-		if( ! is_user_logged_in() ){
-			$bmo_auth = new bmo_auth;
-			$bmo_auth->login_init();
-		}
-	}
-
 }
 
 /** Require Normal Files **/
 require_once 'src/bmo-auth.php';
 
 /** Run this check on the WP Hook. Rest API requests dont use the 'wp' hook **/
-add_action( 'wp', [ new bmo_google_oath, 'bmo_auth_init' ] );
+add_action( 'wp', [ new bmo_auth, 'init' ] );
 
 /** Updater Class only needs to be available in wp-admin **/
 if( is_admin() ){
