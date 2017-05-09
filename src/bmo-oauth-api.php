@@ -62,7 +62,7 @@ class bmo_api extends bmo_auth {
 	}
 
 	private function get_requested_url(){
-		if( ! isset( $_COOKIE[ $this->option_slug . '_requested_url' ] ) ) return home_url();
+		if( ! isset( $_COOKIE[ $this->option_slug . '_requested_url' ] ) ) return new WP_Error( 'no-cookie', 'Couldnt get the requested url.' );
 		return $_COOKIE[ $this->option_slug . '_requested_url' ];
 	}
 

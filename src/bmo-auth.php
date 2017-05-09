@@ -31,8 +31,7 @@
 		}
 
 		private function set_requested_url_cookie(){
-			global $wp;
-			$current_url = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
+			$current_url = home_url( add_query_arg( [] ) );
 			setcookie( $this->option_slug . '_requested_url', $current_url, time() + 300, COOKIEPATH, COOKIE_DOMAIN );
 		}
 
