@@ -62,7 +62,7 @@ class bmo_admin_options extends bmo_google_oath {
 			$this->section_slug // $section
 		);
 		add_settings_field(
-			'bmo_oauth_allowd_domains', //$id
+			'bmo_oauth_allowed_domains', //$id
 			'Allowed Domains', // $title
 			[ $this, 'bmo_oauth_allowed_domains_cb' ], //$callback
 			$this->menu_slug, //$page
@@ -97,7 +97,7 @@ class bmo_admin_options extends bmo_google_oath {
 	}
 
 	public function bmo_oauth_allowed_domains_cb(){
-		echo '<input type="text" id="bmo_oauth_allowd_domains" name="bmo_oauth[bmo_oauth_allowd_domains]" value="' . $this->bmo_options->bmo_oauth_allowd_domains . '">';
+		echo '<input type="text" id="bmo_oauth_allowed_domains" name="bmo_oauth[bmo_oauth_allowed_domains]" value="' . $this->bmo_options->bmo_oauth_allowed_domains . '">';
 	}
 
 	public function render_admin_page(){
