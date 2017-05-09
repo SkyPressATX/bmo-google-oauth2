@@ -43,7 +43,6 @@ class bmo_api extends bmo_auth {
 			$this->google_user = $this->auth->service->userinfo->get();
 
 			$this->approved = $this->check_if_approved_email();
-			print_r( $this );
 			if( ! $this->approved ) return new WP_Error( 'oauth-error', $this->google_user->email . ' Is Not Approved' );
 
 			$this->get_wp_user_object();
@@ -58,11 +57,10 @@ class bmo_api extends bmo_auth {
 	}
 
 	private function check_if_approved_email(){
-		// $new_bmo = new bmo_google_oath;
-		$approved_emails = explode( ',', $this->auth->bmo_options->bmo_oauth_allowed_domains );
+		$domains = explode( ',', $this->bmo_options->bmo_oauth_allowed_domains );
 		$email_check = explode( '@', $this->google_user->email );
 		if( sizeof( $email_check ) > 2 ) return false;
-		return ( in_array( $email_check[1], $approved_emails ) );
+		return ( in_array( $email_check[1], $domains ) );
 	}
 
 	private function get_wp_user_object(){

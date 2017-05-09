@@ -54,7 +54,6 @@
 		private function configure_auth_config(){
 			$this->redirect_url = site_url() . '/' . $this->rest_prefix;
 			$this->redirect_url .= '/' . $this->option_slug . '/v1/' . $this->menu_slug;
-			//unset( $this->bmo_options->bmo_oauth_allowd_domains );
 			$this->bmo_options->client_secret = $this->bmo_oauth_secret_key();
 			$this->bmo_options->auth_uri = "https://accounts.google.com/o/oauth2/auth";
 			$this->bmo_options->token_uri = "https://accounts.google.com/o/oauth2/token";
