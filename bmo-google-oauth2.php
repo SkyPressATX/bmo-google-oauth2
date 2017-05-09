@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.5.8.1
+Version: 0.6
 Author: BMO ^_^
 */
 
