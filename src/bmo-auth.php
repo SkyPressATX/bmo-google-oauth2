@@ -17,27 +17,26 @@
 
 			$this->rest_prefix = rest_get_url_prefix();
 
-			$this->redirect_url = site_url() . '/' . $this->rest_prefix;
-			$this->redirect_url .= '/' . $this->option_slug . '/v1/' . $this->menu_slug;
-
 			//Config Google Client first and always
 			$this->config_google_client();
 
 			$requested_url = explode( '/', $_SERVER[ 'REQUEST_URI' ] );
 			array_shift( $request_url );
 
-
-			if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ) ){
+			print_r( [ $requested_url[0], $this->rest_prefix ] );
+			// if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ) ){
 				$this->login_init();
-			}
+			// }
 		}
 
 		public function login_init(){
 			$this->get_auth_url();
 			if( is_wp_error( $this->auth_url ) ) return $this->auth_url;
 
-			wp_redirect( filter_var( $this->auth_url, FILTER_SANITIZE_URL ) );
-			exit();
+			print_r( $this )
+
+			// wp_redirect( filter_var( $this->auth_url, FILTER_SANITIZE_URL ) );
+			// exit();
 		}
 
 		private function create_google_client(){
@@ -54,7 +53,8 @@
 		}
 
 		private function configure_auth_config(){
-
+			$this->redirect_url = site_url() . '/' . $this->rest_prefix;
+			$this->redirect_url .= '/' . $this->option_slug . '/v1/' . $this->menu_slug;
 			unset( $this->bmo_options->bmo_oauth_allowd_domains );
 			$this->bmo_options->client_secret = $this->bmo_oauth_secret_key();
 			$this->bmo_options->auth_uri = "https://accounts.google.com/o/oauth2/auth";
@@ -82,7 +82,8 @@
 
 		private function add_scope(){
 			try {
-				$this->google->addScope( 'https://www.googleapis.com/auth/userinfo.email' );
+				$this->google->addScope( 'email' );
+				$this->google->addScope( 'profile' );
 			} catch( Exception $e ){ return $this->error_catch( $e ); }
 		}
 

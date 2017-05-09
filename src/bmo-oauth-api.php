@@ -29,10 +29,10 @@ class bmo_api extends bmo_auth {
 		if( isset( $params->error ) ) return WP_Error( 'oath-error', $params->error );
 
 		try {
-			// $auth = new bmo_auth;
-			// $auth->init();
-			$this->google->authenticate( $params->code );
-			$access_token = $this->google->getAccessToken();
+			$auth = new bmo_auth;
+			$auth->init();
+			$auth->google->authenticate( $params->code );
+			$access_token = $auth->google->getAccessToken();
 
 			$this->auto_login( 1 );
 			return $access_token;
