@@ -18,19 +18,7 @@
 			$this->config_google_client();
 
 			// Handle Actions Next
-			if( isset( $_GET[ 'code' ] ) ) $this->validate_google_code( $_GET[ 'code' ] );
 			if( ! is_user_logged_in() ) $this->login_init();
-		}
-
-		public function validate_google_code( $code ){
-			// THIS NEEDS TO BE A REST API ENDPOINT IN THE END
-			try {
-				$this->google->authenticate( $code );
-				$access_token = $this->google->getAccessToken();
-				var_dump( $access_token );
-				return $access_token;
-			} catch( Exception $e ){ return $this->error_catch( $e ); }
-
 		}
 
 		public function login_init(){
@@ -45,7 +33,7 @@
 			$this->google = new Google_Client();
 		}
 
-		private function config_google_client(){
+		public function config_google_client(){
 			$this->create_google_client();
 			$this->configure_auth_config();
 			$auth_config = $this->set_auth_config();
@@ -60,7 +48,7 @@
 			$this->bmo_options->auth_uri = "https://accounts.google.com/o/oauth2/auth";
 			$this->bmo_options->token_uri = "https://accounts.google.com/o/oauth2/token";
 			$this->bmo_options->auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs";
-			$this->bmo_options->redirect_uri = [ site_url() ];
+			$this->bmo_options->redirect_uris = [ site_url() ];
 			$this->google_secrets = [
 				'web' => (array)$this->bmo_options
 			];
