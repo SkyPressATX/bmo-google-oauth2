@@ -11,14 +11,11 @@ class bmo_api extends bmo_auth {
 				'callback' => [ $this, 'auth_success' ],
 				'args' => [
 					'code' => [
-						'validate_callback' => [ $this, 'validate_code' ],
-						'type' => 'string',
-						'sanitize_callback' => 'sanitize_text_field'
+						'type' => 'string'
 					],
 					'error' => [
 						'validate_callback' => [ $this, 'handle_errors' ],
-						'type' => 'string',
-						'sanistize_callback' => 'sanitize_text_field'
+						'type' => 'string'
 					]
 				]
 			]
@@ -27,22 +24,31 @@ class bmo_api extends bmo_auth {
 	}
 
 	public function auth_success( \WP_REST_Request $request ){
-		print_r( $request );
-		wp_redirect( home_url() );
-	}
 
-	public function validate_code( $param, $request, $key ){
+		$params = (object)$request;
+		if( isset( $params->error ) ) return WP_Error( 'oath-error', $params->error );
+
 		try {
-			$auth = new bmo_auth;
-			$auth->init();
-			$this->google->authenticate( $code );
+			// $auth = new bmo_auth;
+			// $auth->init();
+			$this->google->authenticate( $params->code );
 			$access_token = $this->google->getAccessToken();
+
+			$this->auto_login( 1 );
 			return $access_token;
 		} catch( Exception $e ){ return $this->error_catch( $e ); }
 	}
 
 	public function handle_errors( $param, $request, $key ){
 		return WP_Error( 'oauth-error', $param );
+	}
+
+	private function auto_login( $user ){
+		wp_set_current_user( $user );
+		wp_set_auth_cookie( $user, true );
+
+		$user_obj = wp_get_current_user();
+		do_action( 'wp_login', $user_obj->user_login );
 	}
 
 }

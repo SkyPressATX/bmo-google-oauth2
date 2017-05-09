@@ -27,7 +27,7 @@
 			array_shift( $request_url );
 
 
-			if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ){
+			if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ) ){
 				$this->login_init();
 			}
 		}
