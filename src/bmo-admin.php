@@ -7,8 +7,6 @@ if( ! defined( 'WPINC' ) ){
 
 class bmo_admin_options extends bmo_google_oauth {
 
-	private $secret_key;
-
 	public function add_admin_page(){
 		add_options_page(
 			'BMO Google OAuth', //$page_title
@@ -92,7 +90,7 @@ class bmo_admin_options extends bmo_google_oauth {
 	public function bmo_oauth_secret_key_cb(){
 		printf(
 			'<input type="text" id="client_secret" size="100" name="bmo_oauth[client_secret]" value="%s" />',
-			isset( $this->secret_key ) ? esc_attr( $this->secret_key ) : esc_attr( 'NONE' )
+			isset( $this->bmo_options->client_secret ) ? esc_attr( $this->key_decrypt( $this->bmo_options->client_secret ) ) : esc_attr( 'NONE' )
 		);
 	}
 
@@ -101,8 +99,6 @@ class bmo_admin_options extends bmo_google_oauth {
 	}
 
 	public function render_admin_page(){
-
-		$this->secret_key = $this->bmo_oauth_secret_key();
 
 		echo '<div class="wrap"><H1>BMO Google OAuth2 Options</H1><form method="post" action="options.php">';
 		settings_fields( $this->option_slug );
