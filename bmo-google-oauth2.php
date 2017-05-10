@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.8.1
+Version: 0.8.2
 Author: BMO ^_^
 */
 
@@ -33,19 +33,19 @@ class bmo_google_oauth {
 	public function init(){
 		if( isset( $this->bmo_options ) && $this->bmo_options->bmo_oauth_active ){
 			$this->error = $this->bmo_validate_request();
-			if( is_wp_error( $this->error ) ) die( $this->error );
+			if( is_wp_error( $this->error ) ) wp_die( $this->error );
 
 			if( ! $this->is_google && ! is_user_logged_in() ){
 				$this->error = $this->bmo_no_user_redirect();
-				if( is_wp_error( $this->error ) ) die( $this->error );
+				if( is_wp_error( $this->error ) ) wp_die( $this->error );
 			}
 			if( $this->is_google && ! is_user_logged_in() ){
 				$this->error = $this->bmo_set_current_user();
-				if( is_wp_error( $this->error ) ) die( $this->error );
+				if( is_wp_error( $this->error ) ) wp_die( $this->error );
 			}
 			if( is_user_logged_in() && isset( $this->requested_url ) ){
 				$this->error = $this->bmo_redirect_to_requested_url();
-				if( is_wp_error( $this->error ) ) die( $this->error );
+				if( is_wp_error( $this->error ) ) wp_die( $this->error );
 			}
 		}
 	}
