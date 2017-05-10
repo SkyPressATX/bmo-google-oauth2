@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.8.0
+Version: 0.8.1
 Author: BMO ^_^
 */
 
@@ -32,19 +32,19 @@ class bmo_google_oauth {
 
 	public function init(){
 		if( isset( $this->bmo_options ) && $this->bmo_options->bmo_oauth_active ){
-			$this->bmo_validate_request();
+			$this->error = $this->bmo_validate_request();
 			if( is_wp_error( $this->error ) ) die( $this->error );
 
 			if( ! $this->is_google && ! is_user_logged_in() ){
-				$this->bmo_no_user_redirect();
+				$this->error = $this->bmo_no_user_redirect();
 				if( is_wp_error( $this->error ) ) die( $this->error );
 			}
 			if( $this->is_google && ! is_user_logged_in() ){
-				$this->bmo_set_current_user();
+				$this->error = $this->bmo_set_current_user();
 				if( is_wp_error( $this->error ) ) die( $this->error );
 			}
 			if( is_user_logged_in() && isset( $this->requested_url ) ){
-				$this->bmo_redirect_to_requested_url();
+				$this->error = $this->bmo_redirect_to_requested_url();
 				if( is_wp_error( $this->error ) ) die( $this->error );
 			}
 		}
@@ -75,6 +75,7 @@ class bmo_google_oauth {
 			 $this->google_user = NULL;
 			 $this->is_google = FALSE;
 		 }
+		 return;
 	}
 
 	/*
@@ -122,6 +123,7 @@ class bmo_google_oauth {
 		if( is_wp_error( $this->wp_user ) ) return $this->wp_user;
 
 		$this->auto_login();
+		return;
 	}
 
 	public function approve_google_user(){
@@ -129,7 +131,9 @@ class bmo_google_oauth {
 			if( ! isset( $this->bmo_options->bmo_oauth_allowed_domains ) ) return true;
 			$domains = explode( ',', $this->bmo_options->bmo_oauth_allowed_domains );
 			if( empty( $domains ) ) return true;
-			return ( in_array( $this->google_user->hd , $domains ) );
+			if( in_array( $this->google_user->hd , $domains ) ) return true;
+			throw new Exception( "Not An Approved Email" );
+
 		} catch( Exception $e ){ return $this->error_catch( $e ); }
 	}
 
@@ -139,6 +143,7 @@ class bmo_google_oauth {
 			wp_redirect( $this->requested_url );
 			exit();
 		}
+		return;
 	}
 
 	private function get_wp_user_object(){
