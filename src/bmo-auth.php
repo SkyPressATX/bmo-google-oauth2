@@ -20,19 +20,11 @@
 			//Config Google Client first and always
 			$this->config_google_client();
 
-			$requested_url = explode( '/', $_SERVER[ 'REQUEST_URI' ] );
-			array_shift( $requested_url );
-
 			if( ! is_user_logged_in() && ( $requested_url[0] !== $this->rest_prefix ) ){
 				// Get Requested URL
 				$this->set_requested_url_cookie();
 				$this->login_init();
 			}
-		}
-
-		private function set_requested_url_cookie(){
-			$current_url = home_url( add_query_arg( [] ) );
-			setcookie( $this->option_slug . '_requested_url', $current_url, time() + 300, COOKIEPATH, COOKIE_DOMAIN );
 		}
 
 		public function login_init(){

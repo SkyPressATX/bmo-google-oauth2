@@ -51,23 +51,12 @@ class bmo_api extends bmo_auth {
 
 			$this->auto_login();
 
-			$this->requested_url = $this->get_requested_url();
-			$this->remove_cookies();
-
+			if( isset( $this->bmo_options->requested_url ) ) $this->requested_url = $this->bmo_options->requested_url;
 			if( is_wp_error( ( $this->requested_url ) ) ) return $this->requested_url;
 
 			wp_redirect( $this->requested_url );
 			exit();
 		} catch( Exception $e ){ return $this->error_catch( $e ); }
-	}
-
-	private function get_requested_url(){
-		if( ! isset( $_COOKIE[ $this->option_slug . '_requested_url' ] ) ) return new WP_Error( 'no-cookie', 'Couldnt get the requested url.' );
-		return $_COOKIE[ $this->option_slug . '_requested_url' ];
-	}
-
-	private function remove_cookies(){
-		setcookie( $this->option_slug . '_requested_url', '', time() - 300, COOKIEPATH, COOKIE_DOMAIN );
 	}
 
 	public function handle_errors( $param, $request, $key ){
