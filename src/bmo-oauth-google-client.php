@@ -2,23 +2,24 @@
 
 	require_once __DIR__ . '/../vendor/google-api-php-client/vendor/autoload.php'; //Require Google API PHP Client
 
-	class bmo_google_client extends bmo_google_oath {
+	class bmo_google_client extends bmo_google_oauth {
 
 		public $google;
 		public $service;
 		private $client_secrets;
 
-		public function __config( $options = [] ){
+		public function __construct( $options = [] ){
 
-			if( empty( $options ) ) return new WP_Error( 'invalid-oauth', 'No Client Options Set' );
-			if( ! isset( $options->client_id ) ) return new WP_Error( 'invalid-oauth', 'No Client ID Set' );
-			if( ! isset( $options->project_id ) ) return new WP_Error( 'invalid-oauth', 'No Project ID Set' );
+			if( empty( $options ) ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No Client Options Set' )) ;
+			if( ! isset( $options->client_id ) ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No Client ID Set' ) );
+			if( ! isset( $options->project_id ) ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No Project ID Set' ) );
+			if( ! isset( $options->client_secret ) ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No Client Secret Set' ) );
 
 			$this->client_secrets = [
 				'web' => [
 					'client_id' => $options->client_id,
 					'project_id' => $options->project_id,
-					'client_secret' => $this->bmo_oauth_secret_key(),
+					'client_secret' => $this->key_decrypt( $options->client_secret ),
 					'redirect_uris' => [ site_url() ],
 					'auth_uri' => 'https://accounts.google.com/o/oauth2/auth',
 					'token_uri' => 'https://accounts.google.com/o/oauth2/token',
@@ -45,7 +46,7 @@
 		}
 
 		public function validate_code( $code = null ){
-			if( empty( $code ) ) return new WP_Error( 'invalid-oauth', 'No Code Provided to Validate' );
+			if( empty( $code ) ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No Code Provided to Validate' ) );
 			try{
 				return $this->google->authenticate( $code );
 			} catch( Exception $e ){ return $this->error_catch( $e ); }

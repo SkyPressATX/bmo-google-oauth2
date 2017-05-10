@@ -5,7 +5,7 @@ if( ! defined( 'WPINC' ) ){
 }
 
 
-class bmo_admin_options extends bmo_google_oath {
+class bmo_admin_options extends bmo_google_oauth {
 
 	private $secret_key;
 
