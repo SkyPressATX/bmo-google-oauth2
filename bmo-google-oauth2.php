@@ -3,9 +3,11 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.7.2
+Version: 0.7.3
 Author: BMO ^_^
 */
+
+if( ! defined( 'WPINC' ) ) die();
 
 /***** The Master Class to Rule them All *****/
 class bmo_google_oauth {
@@ -31,12 +33,18 @@ class bmo_google_oauth {
 		if( isset( $this->bmo_options ) && $this->bmo_options->bmo_oauth_active ){
 			$this->bmo_validate_request();
 			if( is_wp_error( $this->error ) ) die( $this->error );
-			$this->bmo_no_user_redirect();
-			if( is_wp_error( $this->error ) ) die( $this->error );
-			$this->bmo_set_current_user();
-			if( is_wp_error( $this->error ) ) die( $this->error );
-			$this->bmo_redirect_to_requested_url();
-			if( is_wp_error( $this->error ) ) die( $this->error );
+
+			if( ! $this->is_google && ! is_user_logged_in() ){
+				$this->bmo_no_user_redirect();
+				if( is_wp_error( $this->error ) ) die( $this->error );
+				$this->bmo_set_current_user();
+				if( is_wp_error( $this->error ) ) die( $this->error );
+			}
+
+			if( $this->is_google && is_user_logged_in() ){
+				$this->bmo_redirect_to_requested_url();
+				if( is_wp_error( $this->error ) ) die( $this->error );
+			}
 		}
 	}
 
@@ -83,20 +91,18 @@ class bmo_google_oauth {
 	}
 
 	public function bmo_no_user_redirect(){
-		if( ! is_user_logged_in() && ( ! $this->is_google || ! isset( $this->google_user ) ) ){
-			// First save the originally requested url
-			$this->set_requested_url_cookie();
-			// Build the google_client (it won't be built yet if we are here)
-			$this->google_client = new bmo_google_client( $this->bmo_options );
-			$this->google_client->init();
-			if( is_wp_error( $this->google_client ) ) return $this->google_client;
-			// Get the official $auth_url from the google_client
-			$auth_url = $this->google_client->get_auth_url();
-			if( is_wp_error( $auth_url ) ) return $auth_url;
-			// Redirect the user to Google
-			wp_redirect( filter_var( $auth_url, FILTER_SANITIZE_URL ) );
-			exit();
-		}
+		// First save the originally requested url
+		$this->set_requested_url_cookie();
+		// Build the google_client (it won't be built yet if we are here)
+		$this->google_client = new bmo_google_client( $this->bmo_options );
+		$this->google_client->init();
+		if( is_wp_error( $this->google_client ) ) return $this->google_client;
+		// Get the official $auth_url from the google_client
+		$auth_url = $this->google_client->get_auth_url();
+		if( is_wp_error( $auth_url ) ) return $auth_url;
+		// Redirect the user to Google
+		wp_redirect( filter_var( $auth_url, FILTER_SANITIZE_URL ) );
+		exit();
 	}
 
 	public function strip_code_param(){
@@ -109,7 +115,6 @@ class bmo_google_oauth {
 	public function bmo_set_current_user(){
 		if( ! $this->is_google ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'Not a Google Request') );
 		if( ! isset( $this->google_user ) ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No Google User' ) );
-		if( is_user_logged_in() ) return;;
 
 		$this->wp_user = $this->get_wp_user_object();
 		if( is_wp_error( $this->wp_user ) ) return $this->wp_user;
@@ -127,8 +132,6 @@ class bmo_google_oauth {
 	}
 
 	public function bmo_redirect_to_requested_url(){
-		if( ! is_user_logged_in() ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No User Logged In' ) );
-
 		$requested_url = $this->get_requested_url_cookie();
 		$this->delete_requested_url_cookie();
 		wp_redirect( $requested_url );
@@ -149,7 +152,6 @@ class bmo_google_oauth {
 	private function auto_login(){
 		wp_set_current_user( $this->wp_user->ID );
 		wp_set_auth_cookie( $this->wp_user->ID, true );
-		do_action( 'wp_login', $this->wp_user->user_login );
 	}
 
 	public function key_encrypt( $string ){

@@ -1,5 +1,7 @@
 <?php
 
+if( ! defined( 'WPINC' ) ) die();
+
 	require_once __DIR__ . '/../vendor/google-api-php-client/vendor/autoload.php'; //Require Google API PHP Client
 
 	class bmo_google_client extends bmo_google_oauth {
