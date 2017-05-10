@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.7.0
+Version: 0.7.1
 Author: BMO ^_^
 */
 
@@ -110,7 +110,9 @@ class bmo_google_oauth {
 
 	public function approve_google_user(){
 		try {
+			if( ! isset( $this->bmo_options->bmo_oauth_allowed_domains ) ) return true;
 			$domains = explode( ',', $this->bmo_options->bmo_oauth_allowed_domains );
+			if( empty( $domains ) ) return true;
 			return ( in_array( $this->google_user->hd , $domains ) );
 		} catch( Exception $e ){ return $this->error_catch( $e ); }
 	}
