@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.7.3
+Version: 0.7.4
 Author: BMO ^_^
 */
 
@@ -27,6 +27,7 @@ class bmo_google_oauth {
 
 	public function __construct(){
 		if( ! isset( $this->bmo_options ) ) $this->bmo_options = (object) get_option( $this->option_slug, [] );
+		if( isset( $_COOKIE[ $this->cookie_slug ] ) ) $this->requested_url = $_COOKIE[ $this->cookie_slug ];
 	}
 
 	public function init(){
@@ -37,11 +38,12 @@ class bmo_google_oauth {
 			if( ! $this->is_google && ! is_user_logged_in() ){
 				$this->bmo_no_user_redirect();
 				if( is_wp_error( $this->error ) ) die( $this->error );
+			}
+			if( $this->is_google && ! is_user_logged_in() ){
 				$this->bmo_set_current_user();
 				if( is_wp_error( $this->error ) ) die( $this->error );
 			}
-
-			if( $this->is_google && is_user_logged_in() ){
+			if( is_user_logged_in() && isset( $this->requested_url ){
 				$this->bmo_redirect_to_requested_url();
 				if( is_wp_error( $this->error ) ) die( $this->error );
 			}
@@ -132,10 +134,11 @@ class bmo_google_oauth {
 	}
 
 	public function bmo_redirect_to_requested_url(){
-		$requested_url = $this->get_requested_url_cookie();
 		$this->delete_requested_url_cookie();
-		wp_redirect( $requested_url );
-		exit();
+		if( $this->requested_url !== $this->get_requested_url() ){
+			wp_redirect( $this->requested_url );
+			exit();
+		}
 	}
 
 	private function get_wp_user_object(){
@@ -152,6 +155,8 @@ class bmo_google_oauth {
 	private function auto_login(){
 		wp_set_current_user( $this->wp_user->ID );
 		wp_set_auth_cookie( $this->wp_user->ID, true );
+		wp_redirect( home_url() );
+		exit();
 	}
 
 	public function key_encrypt( $string ){
@@ -173,14 +178,12 @@ class bmo_google_oauth {
         return ( $dc ) ? $dc : $val;
     }
 
-	public function set_requested_url_cookie(){
-		$this->requested_url = home_url( add_query_arg( [] ) );
-		setcookie( $this->cookie_slug, $this->requested_url, ( time() + 8600 ), COOKIEPATH, COOKIE_DOMAIN );
+	public function get_requested_url(){
+		return home_url( add_query_arg( [] ) );
 	}
 
-	public function get_requested_url_cookie(){
-		if( ! isset( $_COOKIE[ $this->cookie_slug ] ) ) return home_url();
-		return $_COOKIE[ $this->cookie_slug ];
+	public function set_requested_url_cookie(){
+		setcookie( $this->cookie_slug, $this->get_requested_url(), ( time() + 8600 ), COOKIEPATH, COOKIE_DOMAIN );
 	}
 
 	public function delete_requested_url_cookie(){
@@ -199,8 +202,7 @@ class bmo_google_oauth {
 /** Require Normal Files **/
 require_once 'src/bmo-oauth-google-client.php';
 
-$bga = new bmo_google_oauth;
-$bga->wp_hooks();
+add_action( 'init', [ new bmo_google_oauth, 'init' ] );
 
 /** Updater Class only needs to be available in wp-admin **/
 if( is_admin() ){
