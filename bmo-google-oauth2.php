@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.8.3
+Version: 0.8.4
 Author: BMO ^_^
 */
 
@@ -23,7 +23,6 @@ class bmo_google_oauth {
 	public $valid;
 	public $google_user;
 	public $wp_user;
-	public $error;
 
 	public function __construct(){
 		if( ! isset( $this->bmo_options ) ) $this->bmo_options = (object) get_option( $this->option_slug, [] );
@@ -126,7 +125,7 @@ class bmo_google_oauth {
 
 	public function bmo_redirect_to_requested_url(){
 		$this->delete_requested_url_cookie();
-		wp_redirect( $this->requested_url );
+		wp_redirect( $this->key_decrypt( $this->requested_url ) );
 		exit();
 	}
 
@@ -183,7 +182,7 @@ class bmo_google_oauth {
 	}
 
 	public function error_catch( $e = false ){
-		if( ! is_wp_error( $e ) ) $e = new WP_Error( $e->getMessage() );
+		if( is_wp_error( $e ) ) $e = $e->get_error_message();
 		$this->bmo_die( $e );
 	}
 

@@ -78,7 +78,7 @@ if( ! defined( 'WPINC' ) ) die();
 		private function set_service(){
 			try {
 				return new Google_Service_Oauth2( $this->google );
-			} catch( Exception $e ){ throw new Exception( $e->getMessage() )); }
+			} catch( Exception $e ){ throw new Exception( $e->getMessage() ); }
 		}
 
 		private function add_scope(){
