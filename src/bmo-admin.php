@@ -39,6 +39,13 @@ class bmo_admin_options extends bmo_google_oauth {
 			$this->section_slug // $section
 		);
 		add_settings_field(
+			'force_login', //$id
+			'Force Login Everywhere?', // $title
+			[ $this, 'bmo_oauth_force_login_cb' ], //$callback
+			$this->menu_slug, //$page
+			$this->section_slug // $section
+		);
+		add_settings_field(
 			'client_id', //$id
 			'Oauth Client ID', // $title
 			[ $this, 'bmo_oauth_client_id_cb' ], //$callback
@@ -77,6 +84,12 @@ class bmo_admin_options extends bmo_google_oauth {
 		printf(
 			'<input type="checkbox" id="autologin_active" name="bmo_oauth[bmo_oauth_active]" value="1" %s>',
 			( $this->bmo_options->bmo_oauth_active == '1' ? 'checked="checked"' : '' )
+		);
+	}
+	public function bmo_oauth_force_login_cb(){
+		printf(
+			'<input type="checkbox" id="force_login" name="bmo_oauth[force_login]" value="1" %s>',
+			( $this->bmo_options->force_login == '1' ? 'checked="checked"' : '' )
 		);
 	}
 

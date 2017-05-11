@@ -3,7 +3,7 @@
 /*
 Plugin Name: BMO Google OAuth2
 Description: Google OAuth2 Plugin
-Version: 0.8.2
+Version: 0.8.3
 Author: BMO ^_^
 */
 
@@ -32,49 +32,44 @@ class bmo_google_oauth {
 
 	public function init(){
 		if( isset( $this->bmo_options ) && $this->bmo_options->bmo_oauth_active ){
-			$this->error = $this->bmo_validate_request();
-			if( is_wp_error( $this->error ) ) wp_die( $this->error );
 
-			if( ! $this->is_google && ! is_user_logged_in() ){
-				$this->error = $this->bmo_no_user_redirect();
-				if( is_wp_error( $this->error ) ) wp_die( $this->error );
+			try {
+				$this->bmo_validate_request();
+
+				if( ! $this->is_google && ! is_user_logged_in() && $this->bmo_options->force_login )
+					$this->bmo_no_user_redirect();
+
+
+				if( $this->is_google && ! is_user_logged_in() && $this->bmo_options->force_login )
+					$this->bmo_set_current_user();
+
+				if( is_user_logged_in() && isset( $this->requested_url ) )
+					$this->bmo_redirect_to_requested_url();
+
+			} catch( Exception $e ){
+				return $this->error_catch( $e );
 			}
-			if( $this->is_google && ! is_user_logged_in() ){
-				$this->error = $this->bmo_set_current_user();
-				if( is_wp_error( $this->error ) ) wp_die( $this->error );
-			}
-			if( is_user_logged_in() && isset( $this->requested_url ) ){
-				$this->error = $this->bmo_redirect_to_requested_url();
-				if( is_wp_error( $this->error ) ) wp_die( $this->error );
-			}
+
 		}
 	}
 
 	public function bmo_validate_request(){
 		 //Check if this is a request from Google
 		 $this->is_google = $this->is_request_google();
-		 if( is_wp_error( $this->is_google ) ) return $this->is_google;
 		 if( ! $this->is_google ) return; // Move along if this isn't even a google request
 
 		 //If this is a google request, validate the $_GET[ 'code' ] param
 		 $this->valid = $this->google_client->validate_code( $_GET[ 'code' ] );
-		 if( is_wp_error( $this->valid ) ) return $this->valid;
 
 		 //Let's strip the $_GET[ 'code' ] param so nothing else can use it
 		 $strip = $this->strip_code_param();
-		 if( is_wp_error( $strip ) ) return $strip;
 
 		 //Get the Google User
 		 $this->google_user = $this->google_client->get_google_user();
-		 if( is_wp_error( $this->google_user ) ) return $this->google_user;
 
 		 //Check if the Google User Email is allowed agains our list of Approved Domains
 		 $approved = $this->approve_google_user();
-		 if( is_wp_error( $approved ) ) return $approved;
-		 if( ! $approved ){
-			 $this->google_user = NULL;
-			 $this->is_google = FALSE;
-		 }
+
 		 return;
 	}
 
@@ -89,7 +84,6 @@ class bmo_google_oauth {
 
 		$this->google_client = new bmo_google_client( $this->bmo_options );
 		$this->google_client->init();
-		if( is_wp_error( $this->google_client ) ) return $this->google_client;
 		return true;
 	}
 
@@ -99,25 +93,21 @@ class bmo_google_oauth {
 		// Build the google_client (it won't be built yet if we are here)
 		$this->google_client = new bmo_google_client( $this->bmo_options );
 		$this->google_client->init();
-		if( is_wp_error( $this->google_client ) ) return $this->google_client;
 		// Get the official $auth_url from the google_client
 		$auth_url = $this->google_client->get_auth_url();
-		if( is_wp_error( $auth_url ) ) return $auth_url;
 		// Redirect the user to Google
 		wp_redirect( filter_var( $auth_url, FILTER_SANITIZE_URL ) );
 		exit();
 	}
 
 	public function strip_code_param(){
-		try {
-			$_GET[ 'code' ] = NULL;
-			return true;
-		} catch( Exception $e ){ return $this->error_catch( $e ); }
+		$_GET[ 'code' ] = NULL;
+		return true;
 	}
 
 	public function bmo_set_current_user(){
-		if( ! $this->is_google ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'Not a Google Request') );
-		if( ! isset( $this->google_user ) ) return $this->error_catch( new WP_Error( 'invalid-oauth', 'No Google User' ) );
+		if( ! $this->is_google ) throw new Exception('Not a Google Reques');
+		if( ! isset( $this->google_user ) ) throw new Exception( 'No Google User' );
 
 		$this->wp_user = $this->get_wp_user_object();
 		if( is_wp_error( $this->wp_user ) ) return $this->wp_user;
@@ -127,23 +117,17 @@ class bmo_google_oauth {
 	}
 
 	public function approve_google_user(){
-		try {
-			if( ! isset( $this->bmo_options->bmo_oauth_allowed_domains ) ) return true;
-			$domains = explode( ',', $this->bmo_options->bmo_oauth_allowed_domains );
-			if( empty( $domains ) ) return true;
-			if( in_array( $this->google_user->hd , $domains ) ) return true;
-			throw new Exception( "Not An Approved Email" );
-
-		} catch( Exception $e ){ return $this->error_catch( $e ); }
+		if( ! isset( $this->bmo_options->bmo_oauth_allowed_domains ) ) return true;
+		$domains = explode( ',', $this->bmo_options->bmo_oauth_allowed_domains );
+		if( empty( $domains ) ) return true;
+		if( in_array( $this->google_user->hd , $domains ) ) return true;
+		throw new Exception( "Not An Approved Email" );
 	}
 
 	public function bmo_redirect_to_requested_url(){
 		$this->delete_requested_url_cookie();
-		if( $this->requested_url !== $this->get_requested_url() ){
-			wp_redirect( $this->requested_url );
-			exit();
-		}
-		return;
+		wp_redirect( $this->requested_url );
+		exit();
 	}
 
 	private function get_wp_user_object(){
@@ -188,7 +172,9 @@ class bmo_google_oauth {
 	}
 
 	public function set_requested_url_cookie(){
-		setcookie( $this->cookie_slug, $this->get_requested_url(), ( time() + 8600 ), COOKIEPATH, COOKIE_DOMAIN );
+		$req_url = $this->get_requested_url();
+		if( $req_url !== home_url() )
+			setcookie( $this->cookie_slug, $this->key_encrypt( $req_url ), ( time() + 8600 ), COOKIEPATH, COOKIE_DOMAIN );
 	}
 
 	public function delete_requested_url_cookie(){
@@ -198,8 +184,11 @@ class bmo_google_oauth {
 
 	public function error_catch( $e = false ){
 		if( ! is_wp_error( $e ) ) $e = new WP_Error( $e->getMessage() );
-		$this->error = $e;
-		return $e;
+		$this->bmo_die( $e );
+	}
+
+	public function bmo_die( $e = '', $code = 403 ){
+		wp_die( $e, $code );
 	}
 
 }
